@@ -1,0 +1,42 @@
+{
+  "name": "jrflog",
+  "version": "1.0.0",
+  "description": "Log",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha ./tests/index.js"
+  },
+  "keywords": [
+    "log",
+    "logs",
+    "jrflog",
+    "jrf"
+  ],
+  "author": {
+    "name": "jirufik",
+    "url": "https://github.com/jirufik"
+  },
+  "maintainers": [
+    {
+      "name": "jirufik",
+      "url": "https://github.com/jirufik"
+    }
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=10"
+  },
+  "dependencies": {
+    "mongodb": "^3.1.12",
+    "pg": "^7.9.0",
+    "pg-query-stream": "^2.0.0"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.0.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jirufik/jrflog"
+  }
+}

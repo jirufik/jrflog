@@ -1,0 +1,380 @@
+const {assert} = require('chai');
+const {expect} = require('chai');
+const Model = require('../models');
+const STDOUT = require('../models/stdout');
+const FILE = require('../models/file');
+const MongoDB = require('../models/mongoDB');
+const PostgreSQL = require('../models/postgreSQL');
+
+module.exports = describe('index model', () => {
+
+    it('constructor default', () => {
+
+        const model = new Model();
+        const typesLog = {
+            info: 'info',
+            warning: 'warning',
+            error: 'error',
+            debug: 'debug',
+            other: 'other'
+        };
+
+        assert.instanceOf(model.model, STDOUT, 'invalid instanceof');
+        expect(model.typesLog).to.eql(typesLog, 'invalid typesLog');
+
+    });
+
+    it('constructor stdout', () => {
+
+        const model = new Model({type: 'stdout'});
+        const typesLog = {
+            info: 'info',
+            warning: 'warning',
+            error: 'error',
+            debug: 'debug',
+            other: 'other'
+        };
+
+        assert.instanceOf(model.model, STDOUT, 'invalid instanceof');
+        expect(model.typesLog).to.eql(typesLog, 'invalid typesLog');
+
+    });
+
+    it('constructor file', () => {
+
+        const model = new Model({type: 'file'});
+        const typesLog = {
+            info: 'info',
+            warning: 'warning',
+            error: 'error',
+            debug: 'debug',
+            other: 'other'
+        };
+
+        assert.instanceOf(model.model, FILE, 'invalid instanceof');
+        expect(model.typesLog).to.eql(typesLog, 'invalid typesLog');
+
+    });
+
+    it('constructor mongoDB', () => {
+
+        const model = new Model({type: 'mongoDB'});
+        const typesLog = {
+            info: 'info',
+            warning: 'warning',
+            error: 'error',
+            debug: 'debug',
+            other: 'other'
+        };
+
+        assert.instanceOf(model.model, MongoDB, 'invalid instanceof');
+        expect(model.typesLog).to.eql(typesLog, 'invalid typesLog');
+
+    });
+
+    it('constructor postgreSQL', () => {
+
+        const model = new Model({type: 'postgreSQL'});
+        const typesLog = {
+            info: 'info',
+            warning: 'warning',
+            error: 'error',
+            debug: 'debug',
+            other: 'other'
+        };
+
+        assert.instanceOf(model.model, PostgreSQL, 'invalid instanceof');
+        expect(model.typesLog).to.eql(typesLog, 'invalid typesLog');
+
+    });
+
+    it('_generateid', async () => {
+
+        const model = new Model();
+
+        let start = new Date().getTime();
+        let res = await model._generateid();
+        let finish = new Date().getTime();
+        let arrRes = res.split('-');
+        let str = arrRes[0];
+        let date = Number(arrRes[1]);
+        let validDate = (start <= date) && (date <= finish);
+
+        assert.isString(res, 'invalid string');
+        assert.equal(str.length, 5, 'invalid length');
+        assert.isTrue(validDate, 'invalid date');
+
+    });
+
+    it('_isObjLog is not obj', async () => {
+
+        const model = new Model();
+
+        let res = await model._isObjLog(2);
+
+        assert.isFalse(res);
+
+    });
+
+    it('_isObjLog is obj', async () => {
+
+        const model = new Model();
+
+        let res = await model._isObjLog({log: 'test'});
+
+        assert.equal(res, 'test');
+
+    });
+
+    it('_generateEmptyLog', async () => {
+
+        const model = new Model();
+
+        let res = await model._generateEmptyLog();
+
+        assert.equal(res.log, '', 'invalid log');
+        assert.equal(res.comment, '', 'invalid comment');
+        assert.equal(res.system, '', 'invalid system');
+        assert.equal(res.user, '', 'invalid user');
+        assert.equal(res.type, model.typesLog.other, 'invalid type');
+        assert.equal(res.code, '', 'invalid code');
+        assert.equal(res.id.length, 19, 'invalid id');
+        assert.instanceOf(res.posted, Date);
+
+    });
+
+    it('_getType log string not type', async () => {
+
+        const model = new Model();
+        const log = 'test log';
+
+        let res = await model._getType(log);
+
+        assert.equal(res, model.typesLog.other);
+
+    });
+
+    it('_getType log string with invalid type', async () => {
+
+        const model = new Model();
+        const log = 'test log';
+        const type = 'invalid type';
+
+        let res = await model._getType(log, type);
+
+        assert.equal(res, model.typesLog.other);
+
+    });
+
+    it('_getType log string with invalid type number', async () => {
+
+        const model = new Model();
+        const log = 'test log';
+        const type = 33;
+
+        let res = await model._getType(log, type);
+
+        assert.equal(res, model.typesLog.other);
+
+    });
+
+    it('_getType log string with valid type', async () => {
+
+        const model = new Model();
+        const log = 'test log';
+        const type = 'info';
+
+        let res = await model._getType(log, type);
+
+        assert.equal(res, model.typesLog.info);
+
+    });
+
+    it('_getType log object without type', async () => {
+
+        const model = new Model();
+        const log = {
+            log: 'test log'
+        };
+
+        let res = await model._getType(log);
+
+        assert.equal(res, model.typesLog.other);
+
+    });
+
+    it('_getType log object with type', async () => {
+
+        const model = new Model();
+        const log = {
+            log: 'test log',
+            type: model.typesLog.info
+        };
+
+        let res = await model._getType(log);
+
+        assert.equal(res, model.typesLog.info);
+
+    });
+
+    it('_getType log object with invalid type', async () => {
+
+        const model = new Model();
+        const log = {
+            log: 'test log',
+            type: 22
+        };
+
+        let res = await model._getType(log);
+
+        assert.equal(res, model.typesLog.other);
+
+    });
+
+    it('_fillFields', async () => {
+
+        const model = new Model();
+
+        const rickLog = {
+            log: 'Rick log',
+            comment: 'Super space',
+            system: 'Earth 4',
+            user: 'rick',
+            type: 'info',
+            id: 'rick-id',
+        };
+
+        const resLog = {};
+
+        const validRes = {
+            log: 'Rick log',
+            comment: 'Super space',
+            system: 'Earth 4',
+            user: 'rick',
+            code: ''
+        };
+
+        await model._fillFields([
+            'log',
+            'comment',
+            'system',
+            'user',
+            'code'
+        ], resLog, rickLog);
+
+        expect(resLog).to.eql(validRes);
+
+    });
+
+    it('_fillLog default', async () => {
+
+        const model = new Model();
+
+        let res = await model._fillLog({});
+
+        assert.equal(res.log, '""', 'invalid log');
+        assert.equal(res.comment, '', 'invalid comment');
+        assert.equal(res.system, '', 'invalid system');
+        assert.isTrue(res.posted instanceof Date, 'invalid posted');
+        assert.equal(res.type, model.typesLog.other, 'invalid type');
+        assert.equal(res.code, '', 'invalid code');
+        assert.equal(res.id.length, 19, 'invalid id');
+
+    });
+
+    it('_fillLog log string without type', async () => {
+
+        const model = new Model();
+        const log = 'test log';
+
+        let res = await model._fillLog({log});
+
+        assert.equal(res.log, '"test log"', 'invalid log');
+        assert.equal(res.comment, '', 'invalid comment');
+        assert.equal(res.system, '', 'invalid system');
+        assert.isTrue(res.posted instanceof Date, 'invalid posted');
+        assert.equal(res.type, model.typesLog.other, 'invalid type');
+        assert.equal(res.code, '', 'invalid code');
+        assert.equal(res.id.length, 19, 'invalid id');
+
+    });
+
+    it('_fillLog log string with type', async () => {
+
+        const model = new Model();
+        const log = 'test log';
+        const type = model.typesLog.info;
+
+        let res = await model._fillLog({log, type});
+
+        assert.equal(res.log, '"test log"', 'invalid log');
+        assert.equal(res.comment, '', 'invalid comment');
+        assert.equal(res.system, '', 'invalid system');
+        assert.isTrue(res.posted instanceof Date, 'invalid posted');
+        assert.equal(res.type, model.typesLog.info, 'invalid type');
+        assert.equal(res.code, '', 'invalid code');
+        assert.equal(res.id.length, 19, 'invalid id');
+
+    });
+
+    it('_fillLog log object', async () => {
+
+        const model = new Model();
+        const log = {test: 'test log'};
+
+        let res = await model._fillLog({log});
+
+        assert.equal(res.log, '{"test":"test log"}', 'invalid log');
+        assert.equal(res.comment, '', 'invalid comment');
+        assert.equal(res.system, '', 'invalid system');
+        assert.isTrue(res.posted instanceof Date, 'invalid posted');
+        assert.equal(res.type, model.typesLog.other, 'invalid type');
+        assert.equal(res.code, '', 'invalid code');
+        assert.equal(res.id.length, 19, 'invalid id');
+
+    });
+
+    it('_fillLog log object with type', async () => {
+
+        const model = new Model();
+        const log = {test: 'test log'};
+        const type = model.typesLog.info;
+
+        let res = await model._fillLog({log, type});
+
+        assert.equal(res.log, '{"test":"test log"}', 'invalid log');
+        assert.equal(res.comment, '', 'invalid comment');
+        assert.equal(res.system, '', 'invalid system');
+        assert.isTrue(res.posted instanceof Date, 'invalid posted');
+        assert.equal(res.type, model.typesLog.info, 'invalid type');
+        assert.equal(res.code, '', 'invalid code');
+        assert.equal(res.id.length, 19, 'invalid id');
+
+    });
+
+    it('_fillLog log is rickLog ', async () => {
+
+        const model = new Model();
+        const log = {
+            log: 'Rick log',
+            comment: 'Super space',
+            system: 'Earth 4',
+            user: 'rick',
+            posted: new Date(),
+            type: 'info',
+            id: 'rick-id',
+            code: 'r'
+        };
+
+        let res = await model._fillLog({log});
+
+        assert.equal(res.log, 'Rick log', 'invalid log');
+        assert.equal(res.comment, 'Super space', 'invalid comment');
+        assert.equal(res.system, 'Earth 4', 'invalid system');
+        assert.isTrue(res.posted instanceof Date, 'invalid posted');
+        assert.equal(res.type, model.typesLog.info, 'invalid type');
+        assert.equal(res.code, 'r', 'invalid code');
+        assert.equal(res.id.length, 19, 'invalid id');
+    });
+
+});
