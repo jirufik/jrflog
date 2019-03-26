@@ -42,11 +42,40 @@ module.exports = class Model {
     }
 
     async get(filter) {
+        await this._convertTypeFilter(filter);
         return await this.model.get(filter);
     }
 
     async del(filter) {
+        await this._convertTypeFilter(filter);
         return await this.model.del(filter);
+    }
+
+    async _convertTypeFilter(filter) {
+
+        if (typeof filter !== 'object') return;
+        if (Array.isArray(filter)) return ;
+
+        if (filter.first) {
+            filter.first = Number(filter.first);
+        }
+
+        if (filter.last) {
+            filter.last = Number(filter.last);
+        }
+
+        if (filter.offset) {
+            filter.offset = Number(filter.offset);
+        }
+
+        if (filter.onlyCount) {
+            filter.onlyCount = Boolean(filter.onlyCount);
+        }
+
+        if (filter.stream) {
+            filter.stream = Boolean(filter.stream);
+        }
+
     }
 
     async _generateEmptyLog() {

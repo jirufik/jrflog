@@ -377,4 +377,32 @@ module.exports = describe('index model', () => {
         assert.equal(res.id.length, 19, 'invalid id');
     });
 
+    it('_convertTypeFilter', async () => {
+
+        const model = new Model();
+        const filter = {
+            log: 'ddsf',
+            first: '2',
+            last: '3',
+            offset: '1',
+            onlyCount: '1',
+            stream: 'false'
+        };
+
+        await model._convertTypeFilter(filter);
+
+        assert.isString(filter.log, 'invalid log');
+        assert.isNumber(filter.first, 'invalid first');
+        assert.equal(filter.first, 2, 'invalid first value');
+        assert.isNumber(filter.last, 'invalid last');
+        assert.equal(filter.last, 3, 'invalid last value');
+        assert.isNumber(filter.offset, 'invalid offset');
+        assert.equal(filter.offset, 1, 'invalid offset value');
+        assert.isBoolean(filter.onlyCount, 'invalid onlyCount');
+        assert.isTrue(filter.onlyCount, 'invalid onlyCount value');
+        assert.isBoolean(filter.stream, 'invalid stream');
+        assert.isTrue(filter.stream, 'invalid stream value');
+
+    });
+
 });
