@@ -43,16 +43,18 @@ module.exports = describe('file', () => {
 
         const model = new FileModel();
         await model.init({
-            path: 'path',
-            name: 'name',
+            path: __dirname,
+            name: 'name_file',
             separator: '|',
             typeOutput: 'json'
         });
 
-        assert.equal(model.path, 'path', 'invalid path');
-        assert.equal(model.name, 'name', 'invalid name');
+        assert.equal(model.path, __dirname, 'invalid path');
+        assert.equal(model.name, 'name_file', 'invalid name');
         assert.equal(model.separator, '|', 'invalid separator');
         assert.equal(model.typeOutput, 'json');
+
+        await fsPromises.unlink(`${model.path}/${model.name}`);
 
     });
 
@@ -790,8 +792,6 @@ module.exports = describe('file', () => {
     });
 
 
-
-
     it('add json', async () => {
 
         const modelInit = new FileModel();
@@ -1079,7 +1079,6 @@ module.exports = describe('file', () => {
         notClear = false;
 
     });
-
 
 });
 

@@ -311,6 +311,7 @@ module.exports = class File {
         this.name = name;
         this.separator = separator;
         this.typeOutput = typeOutput;
+        await this._initFile();
     }
 
     async add(log) {
@@ -354,6 +355,18 @@ module.exports = class File {
 
     async del(filter) {
         return 0;
+    }
+
+    async _initFile() {
+
+        const fullName = `${this.path}/${this.name}`;
+
+        try {
+            let stat = await fsPromises.stat(fullName);
+        } catch (e) {
+            await fsPromises.appendFile(fullName, '');
+        }
+
     }
 
     async _fillCountLogs(filter) {
